@@ -1,0 +1,1 @@
+-keepclassmembers class io.github.rthdfd.dsh.CommandResultReceiver { *; }

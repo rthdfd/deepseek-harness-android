@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="dsh_blue">#4D6BFE</color>
+    <color name="dsh_blue_dark">#3552E8</color>
+    <color name="dsh_background">#F7F8FA</color>
+    <color name="dsh_surface">#FFFFFF</color>
+    <color name="dsh_text">#17181A</color>
+    <color name="dsh_muted">#61666D</color>
+    <color name="dsh_divider">#E2E4E8</color>
+    <color name="dsh_success">#16835D</color>
+    <color name="dsh_error">#B42318</color>
+    <color name="ic_launcher_background">#4D6BFE</color>
+</resources>
