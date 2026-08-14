@@ -292,40 +292,33 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun showStopped() {
-        showSetup("DSH 未运行", "首次安装会在 Termux 中编译依赖，耗时取决于网络和手机性能。")
+        showSetup("DSH 未运行", "启动前请确认 proot 里已装好 DSH；点击“检查环境”可验证。")
         configureButtons(
             primary = "启动 DSH" to { startDsh() },
-            secondary = "安装或修复" to { installDsh() },
+            secondary = "检查环境" to { installDsh() },
         )
     }
 
     private fun installDsh() {
-        showBusy("正在安装 DSH", "Termux 将显示完整安装日志。安装结束后会自动返回结果。")
-        runAsset("setup.sh", "安装 DSH", "安装 DeepSeek Harness 及 Android 兼容依赖", background = false) { result ->
+        showBusy("正在检查 DSH", "检查 proot 中的 DSH 环境…")
+        runAsset("setup.sh", "检查 DSH", "检查 proot 中的 DSH", background = true) { result ->
             if (result.succeeded) {
-                Toast.makeText(this, "DSH 安装完成", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "DSH 环境正常", Toast.LENGTH_SHORT).show()
                 startDsh()
             } else {
-                showFailure("安装失败", result)
+                showFailure("未找到 DSH", result)
             }
         }
     }
 
     private fun startDsh() {
-        showBusy("正在启动 DSH", "启动本地服务…")
-        runAsset("start.sh", "启动 DSH", "启动 DeepSeek Harness Web 服务", background = true) { result ->
-            if (!result.succeeded) {
-                if (result.exitCode == 3) {
-                    installDsh()
-                } else if (looksLikeExternalAppsBlocked(result)) {
-                    showExternalAppsSetup()
-                } else {
-                    showFailure("启动失败", result)
-                }
-                return@runAsset
+        showBusy("正在启动 DSH", "通过 proot 启动本地服务，首次约需半分钟…")
+        runAsset("start.sh", "启动 DSH", "启动 DeepSeek Harness Web 服务", background = false, sessionAction = "2") { result ->
+            if (!result.succeeded && webView.visibility != View.VISIBLE) {
+                showFailure("启动失败", result)
             }
-            waitForServer(attempt = 0)
         }
+        waitForServer(attempt = 0)
     }
 
     private fun waitForServer(attempt: Int) {
@@ -334,8 +327,8 @@ class MainActivity : ComponentActivity() {
             runOnUiThread {
                 when {
                     ready -> openDsh()
-                    attempt < 20 -> root.postDelayed({ waitForServer(attempt + 1) }, 800)
-                    else -> showSetup("服务未响应", "DSH 已启动，但 127.0.0.1:3080 暂无响应。")
+                    attempt < 90 -> root.postDelayed({ waitForServer(attempt + 1) }, 1000)
+                    else -> showSetup("服务未响应", "DSH 启动超时。可在 Termux 的会话中查看输出，确认 dsh web 是否正常。")
                         .also {
                             configureButtons(
                                 primary = "重试" to { waitForServer(0) },
@@ -359,11 +352,12 @@ class MainActivity : ComponentActivity() {
         label: String,
         description: String,
         background: Boolean,
+        sessionAction: String = "0",
         onResult: (CommandResult) -> Unit,
     ) {
         commandRunning = true
         val script = assets.open(assetName).bufferedReader().use { it.readText() }
-        TermuxBridge.sendScript(this, script, label, description, background) { result ->
+        TermuxBridge.sendScript(this, script, label, description, background, sessionAction) { result ->
             commandRunning = false
             onResult(result)
         }
