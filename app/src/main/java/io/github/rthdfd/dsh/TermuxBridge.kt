@@ -96,6 +96,7 @@ internal object TermuxBridge {
         label: String,
         description: String,
         background: Boolean,
+        sessionAction: String = "0",
         onResult: (CommandResult) -> Unit,
     ): String {
         check(isInstalled(context)) { "Termux is not installed" }
@@ -124,7 +125,7 @@ internal object TermuxBridge {
             putExtra(EXTRA_STDIN, script)
             putExtra(EXTRA_WORKDIR, "/data/data/com.termux/files/home")
             putExtra(EXTRA_BACKGROUND, background)
-            putExtra(EXTRA_SESSION_ACTION, "0")
+            putExtra(EXTRA_SESSION_ACTION, sessionAction)
             putExtra(EXTRA_LABEL, label)
             putExtra(EXTRA_DESCRIPTION, description)
             putExtra(EXTRA_PENDING_INTENT, pendingIntent)
