@@ -178,6 +178,12 @@ class MainActivity : ComponentActivity() {
         settings.allowUniversalAccessFromFileURLs = false
         settings.mediaPlaybackRequiresUserGesture = true
         settings.safeBrowsingEnabled = true
+        settings.useWideViewPort = true
+        settings.loadWithOverviewMode = true
+        settings.textZoom = 100
+        overScrollMode = View.OVER_SCROLL_NEVER
+        isVerticalScrollBarEnabled = false
+        isHorizontalScrollBarEnabled = false
         webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
                 val uri = request.url
