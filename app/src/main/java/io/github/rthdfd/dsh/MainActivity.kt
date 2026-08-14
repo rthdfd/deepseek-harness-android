@@ -1,6 +1,7 @@
 package io.github.rthdfd.dsh
 
-import android.app.Activity
+import androidx.activity.ComponentActivity
+import androidx.activity.OnBackPressedCallback
 import android.app.DownloadManager
 import android.content.ActivityNotFoundException
 import android.content.ClipData
@@ -34,7 +35,7 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.util.concurrent.Executors
 
-class MainActivity : Activity() {
+class MainActivity : ComponentActivity() {
     private val executor = Executors.newSingleThreadExecutor()
     private lateinit var root: FrameLayout
     private lateinit var setupView: View
@@ -57,6 +58,15 @@ class MainActivity : Activity() {
         root.addView(webView, matchParentParams())
         root.addView(setupView, matchParentParams())
         setContentView(root)
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                when {
+                    webView.visibility == View.VISIBLE && webView.canGoBack() -> webView.goBack()
+                    webView.visibility == View.VISIBLE -> showRunning()
+                    else -> finish()
+                }
+            }
+        })
         refreshState(autoStart = true)
     }
 
@@ -73,15 +83,6 @@ class MainActivity : Activity() {
         executor.shutdownNow()
         webView.destroy()
         super.onDestroy()
-    }
-
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
-        when {
-            webView.visibility == View.VISIBLE && webView.canGoBack() -> webView.goBack()
-            webView.visibility == View.VISIBLE -> showRunning()
-            else -> super.onBackPressed()
-        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -176,9 +177,7 @@ class MainActivity : Activity() {
         settings.allowFileAccessFromFileURLs = false
         settings.allowUniversalAccessFromFileURLs = false
         settings.mediaPlaybackRequiresUserGesture = true
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            settings.safeBrowsingEnabled = true
-        }
+        settings.safeBrowsingEnabled = true
         webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
                 val uri = request.url
