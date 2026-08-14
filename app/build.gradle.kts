@@ -3,6 +3,10 @@ plugins {
     id("org.jetbrains.kotlin.android")
 }
 
+dependencies {
+    implementation("androidx.activity:activity-ktx:1.10.1")
+}
+
 android {
     namespace = "io.github.rthdfd.dsh"
     compileSdk = 36
